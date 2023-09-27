@@ -94,7 +94,7 @@ function construindoTabela(modalLoading) {
             `<div class="col-12">
             <div class="card mb-3">
                 <div class="card-header bg-transparent">
-                    <h3>Dados do mes atual: </h3>
+                    <h3>Tabela de fechamentos</h3>
                 </div>
                 <div class="card-body">
                 <table 
