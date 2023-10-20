@@ -21,7 +21,7 @@ function filtroFechamentosReprovados(){
                 <div class="card-body">
                     De: <input type="date" style="padding:5px;border-radius:7px" class="mt-1 form-control text-left" id="data_fechamento_ini" />
                     Ate: <input type="date" style="padding:5px;border-radius:7px" class="mt-1 form-control text-left" id="data_fechamento_fin" />
-                    ${selectEmpresa()}
+                    ${selectEmpresa('selectNotasReprovadas')}
                     <button type="submit" onclick="filtraFechamento()" style="width:100%;" class="btn btn-primary mb-3 mt-3">Buscar</button>
                 </div>
             </div>
@@ -54,21 +54,6 @@ function formataData(data){
     return `${dataComFormato[2]}/${dataComFormato[1]}/${dataComFormato[0]}`
 }
 
-function selectEmpresa(){
-    let sql = `SELECT CODEMP, NOMEFANTASIA FROM TSIEMP WHERE CODEMP < 100`;
-    let dadosSelect = getDadosSql(sql,true);
-    let select = `
-    <select class="form-select mt-3" id="selectNotasReprovadas">
-        <option value="" selected>Selecione a empresa</option>`;
-
-        for(let i = 0; i < dadosSelect.length; i ++){
-
-            select +=`<option value="${dadosSelect[i].CODEMP}">${dadosSelect[i].NOMEFANTASIA}</option>`;
-        }
-    
-    select+=`</select>`;
-    return select;
-}
 
 function notasReprovadas(loja,data){
     if(loja==undefined){
@@ -106,7 +91,7 @@ function notasReprovadas(loja,data){
                                 Observacao: ${e.OBSERVACAO != null ? e.OBSERVACAO : "Sem observacao"}
                             </div>
                             <div class="card-footer d-flex justify-content-around">
-                                <button class="btn btn-secondary" onclick="visualizaImagens(${e.IDFECH},'notasReprovadas')"><span title="Visualizar Nota"><i class="bi bi-file-earmark-text-fill"></i></span></button>
+                                <button class="btn btn-secondary" onclick="visualizaImagens(${e.IDFECH})"><span title="Visualizar Nota"><i class="bi bi-file-earmark-text-fill"></i></span></button>
                                 <button class="btn btn-success" onclick="salvarDadosFechamento(${e.IDFECH})"><span title="Reprovar fechamento do caixa"><i class="bi bi-check2"></i></span></button>
                             </div>
                         </div>
@@ -119,19 +104,25 @@ function notasReprovadas(loja,data){
         rowReprovado = "<tr><td>Nao ha dados</td></tr>" 
     }
 
-
     let inicioNotasReprovadas = `
+        <style>
+            .th-inner {
+                font-weight:200;
+                font-size:24px;
+            }
+        </style>
         <div class="container">
-            <div class="card">
+            <div class="card" style="width:600px;margin:0 auto;">
                 <table 
                     id="tableNotasAvaliadas" 
-                        class="table"
-                        style="overflow:hidden"
-                        data-pagination="true"
-                        data-page-size="5">
-                        <thead>
-                            <tr>
-                                <th style="text-align:center" data-field="title">Fechamentos reprovados:</th>
+                    class="table table-bordered"
+                    style="overflow:hidden;border-collapse:separate;"
+                    data-pagination="true"
+                    data-page-size="3"
+                    data-toggle="table">
+                        <thead style="font-weight:200;font-size:30px;">
+                            <tr class="table-borderless" >
+                                <th data-field="titleComprovantesReprovados">Fechamentos reprovados:</th>
                             </tr>
                         </thead>
                     <tbody>
@@ -139,8 +130,7 @@ function notasReprovadas(loja,data){
                     </tbody>
                 </table>
             </div>
-        </div>
-    `
+       </div>`
 
     $(function () {
         $('#tableNotasAvaliadas').bootstrapTable({

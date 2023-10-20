@@ -21,56 +21,10 @@ function formatData(data){
     betweenData.mes = mes;
     betweenData.ano = ano;
     betweenData.dia = dia;
-    console.log(betweenData)
+    (betweenData)
     return betweenData;
 }
 
-// função ao clicar no botao de buscar é acionado
-function buscarDadosFechamento(){
-    let loja = $("#buscar_loja").val();
-    let dataSemFormato = $("#buscar_data").val();
-    let data = "";
-    let whereLoja = "";
-    console.log(loja,dataSemFormato)
-    if(dataSemFormato== undefined || dataSemFormato == ""){
-        console.log("Data está undefined")
-    }else{
-        console.log("Data está preenchido")
-        let dataArray = dataSemFormato.split('-');
-        data = `01/${dataArray[1]}/${dataArray[0]}`
-        console.log(data)
-    }
-    if(loja == undefined || loja == ""){
-        console.log("Loja está vazio")
-    }else{
-        console.log("Loja foi preenchido: "+loja)
-        whereLoja="AND ac.CODEMP = "+loja;
-    }
-    cardBusca(data,whereLoja);
-}
-
-
-// apaga a tela inteira e reconstrói novamente com os dados da busca
-function cardBusca(dataFull, loja){
-    let cardBusca = `
-            <div class="container">
-                <div class="col d-flex justify-content-center text-left">
-                    <div class="card mb-3">
-                        <div class="card-header bg-transparent">Buscar:</div>
-                        <div class="card-body">
-                            <input id="buscar_loja" class="form-control" type="number" placeholder="Buscar por loja"/>
-                            <input type="month" style="padding:5px;border-radius:7px" class="mt-3 text-left" id="buscar_data" />
-                            <button type="submit" onclick="buscarDadosFechamento()" id="acao_buscar" style="width:100%;" class="btn btn-primary mb-3 mt-3">Buscar!</button>
-                        </div>
-                    </div>
-                </div>
-                ${cardResultBusca(dataFull,loja)}
-            </div>
-    `
-    let home = $("#home")
-    home.empty();
-    home.append(cardBusca)
-}
 
 // função que cria a tabela pesquisado
 function cardResultBusca(dataFull,loja){
@@ -90,8 +44,23 @@ function cardResultBusca(dataFull,loja){
     ${dataFormat}
     ${loja}
     `;
-    console.log(sql)
-
     let dadosConfCega = getDadosSql(sql,true);
     return construindoTabela(dadosConfCega);
+}
+
+
+function selectEmpresa(nome,onchange){
+    let sql = `SELECT CODEMP, NOMEFANTASIA FROM TSIEMP WHERE CODEMP < 100`;
+    let dadosSelect = getDadosSql(sql,true);
+    let select = `
+        <select ${onchange} class="form-select" id="${nome}">
+        <option value="" selected>Selecione a empresa</option>`;
+
+        for(let i = 0; i < dadosSelect.length; i ++){
+
+            select +=`<option value="${dadosSelect[i].CODEMP}">${dadosSelect[i].NOMEFANTASIA}</option>`;
+        }
+    
+    select+=`</select>`;
+    return select;
 }

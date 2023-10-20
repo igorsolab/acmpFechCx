@@ -247,7 +247,7 @@ function saveRecord(entity,fields,key){
 
     let modal = `
     <div class="modal fade" id="modalLoading">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <!-- Modal Header -->
                 <div class="modal-header">

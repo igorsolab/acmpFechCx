@@ -53,20 +53,21 @@
 
 	<!-- Script de API Teste(PC Pessoal) -->
 	<script language="JavaScript">
-		document.write('<scr' + 'ipt src="http://172.16.63.140/acompFechCaixa/acompFechCaixa.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
-		document.write('<scr' + 'ipt src="http://172.16.63.140/acompFechCaixa/notasReprovadas.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
-		document.write('<scr' + 'ipt src="http://172.16.63.140/acompFechCaixa/sankhya.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
-		document.write('<scr' + 'ipt src="http://172.16.63.140/acompFechCaixa/confCega.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+		document.write('<scr' + 'ipt src="http://172.16.63.107/acompFechCaixa/acompFechCaixa.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+		document.write('<scr' + 'ipt src="http://172.16.63.107/acompFechCaixa/notasReprovadas.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+		document.write('<scr' + 'ipt src="http://172.16.63.107/acompFechCaixa/sankhya.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+		document.write('<scr' + 'ipt src="http://172.16.63.107/acompFechCaixa/confCega.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+		document.write('<scr' + 'ipt src="http://172.16.63.107/acompFechCaixa/servicos.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
 	</script>
 
 	<!-- Script de API Teste(Servidor)-->
 	<!-- <script language="JavaScript">
 					hostname = location.hostname;
-					// document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/recarga/recarga.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
-					// document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/recarga/sankhya.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
-					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/confmeta/confmeta.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
-					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/confmeta/recuperandoDados.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
-					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/confmeta/sankhya.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/acompFechCaixa/acompFechCaixa.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/acompFechCaixa/notasReprovadas.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/acompFechCaixa/sankhya.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/acompFechCaixa/confCega.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
+					document.write('<scr' + 'ipt src="http://'+hostname+'/sankhya/acompFechCaixa/servicos.js?versao=' + Math.random() + '?"><\/scr' + 'ipt>');
 	</script>  -->
 
 	<snk:load />
