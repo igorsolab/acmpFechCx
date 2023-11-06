@@ -43,6 +43,18 @@ function navbar() {
         .modal-custom .modal-dialog {
             margin: 0 auto;
         }
+        .coluna-diaria-fechamento:hover{
+            transform:scale(1.1);
+            transition:.8s;
+        }
+        .card-comprovantes-single:hover{
+            box-shadow: 2px 2px 22px 0px rgba(0,0,0,0.75);
+            -webkit-box-shadow: 2px 2px 22px 0px rgba(0,0,0,0.75);
+            -moz-box-shadow: 2px 2px 22px 0px rgba(0,0,0,0.75);
+            transform:scale(1.1);
+            transition:.5s;
+            z-index:999;
+        }
     </style>
     <nav class="mb-5" style="background-color: #212529;padding:15px 0px">
         <div class="text-center mb-3 text-white" style=" font-size:2em;">
@@ -73,7 +85,9 @@ function navbar() {
 
 
 function textHome() {
+
     let card = `
+    
     <div class="container">
         <div class="col d-flex justify-content-center text-left">
             <div class="card mb-3">
@@ -178,7 +192,7 @@ function construindoTabela(modalLoading) {
                 let color = verificaSeExiste(numLojas[z][0],j, dataFull.mes, dataFull.ano)
                     tabela += ` <td class="${color}" style="cursor:pointer; text-align:center" onclick="fechamentoDeCaixa(${numLojas[z][0]},${j},${dataFull.mes},${dataFull.ano});">
                                     <span title="Loja: ${numLojas[z][1].trim()} na data: ${j < 10 ? "0"+j : j}/${dataFull.mes}/${dataFull.ano}">
-                                        <i class="bi bi-file-earmark-fill"></i>
+                                        <i class="bi bi-file-earmark-fill coluna-diaria-fechamento" ></i>
                                     </span>
                                 </td>`
 
@@ -247,7 +261,10 @@ function modalFechamento(codEmp,dia,mes,ano){
                         INNER JOIN AD_CONFERENCIACEGA cc ON cc.IDCONFCEGA = ac.IDCONFCEGA 
                         WHERE t.CODEMP < 100
                         AND ac.CODEMP = ${codEmp}
-                        and ac.DHFECH between '${dia<10 ? "0"+dia : dia}/${mes < 10 ? "0"+mes : mes}/${ano} 00:00:00' and '${dia<10 ? "0"+dia : dia}/${mes < 10 ? "0"+mes : mes}/${ano} 23:59:59'`;
+                        and ac.DHFECH between '${dia<10 ? "0"+dia : dia}/${mes < 10 ? "0"+mes : mes}/${ano} 00:00:00' and '${dia<10 ? "0"+dia : dia}/${mes < 10 ? "0"+mes : mes}/${ano} 23:59:59'
+                        AND ac.ATIVO = 'S'
+                        `;
+
 
     let dadosIndividuais = getDadosSql(sql,true)
 
@@ -338,16 +355,16 @@ function modalReprovacaoNota(id){
             </div>
         </div>
     </div>
-`
+    `
 
-let body= $("body")
-body.append(modal);
+    let body= $("body")
+    body.append(modal);
 
-var myModal = new bootstrap.Modal(document.getElementById('modalReprovado'),{
-    keyboard:false,
-    backdrop:false
-})
-myModal.show()
+    var myModal = new bootstrap.Modal(document.getElementById('modalReprovado'),{
+        keyboard:false,
+        backdrop:false
+    })
+    myModal.show()
 
 }
 function saveReprovado(id){
@@ -359,32 +376,32 @@ function saveReprovado(id){
     let fields = {}
     let sql = `SELECT IDACFECH, CODEMP, CODUSU FROM AD_ACOMPFECHCAIXA WHERE IDFECH = ${id}`;
     let dadosReprovacao = getDadosSql(sql,true)
-    if(dadosReprovacao.length >0){
-        fields.CODEMP = formatDataSankhya(dadosReprovacao[0].CODEMP)
-        fields.CODUSU = formatDataSankhya(dadosReprovacao[0].CODUSU)
-        fields.IDFECH = formatDataSankhya(id)
-        fields.APROVADO = formatDataSankhya("N")
-        fields.OBSERVACAO = formatDataSankhya(observacao)
-        let key = {
-            "IDACFECH": formatDataSankhya(dadosReprovacao[0].IDACFECH)
+        if(dadosReprovacao.length >0){
+            fields.CODEMP = formatDataSankhya(dadosReprovacao[0].CODEMP)
+            fields.CODUSU = formatDataSankhya(dadosReprovacao[0].CODUSU)
+            fields.IDFECH = formatDataSankhya(id)
+            fields.APROVADO = formatDataSankhya("N")
+            fields.OBSERVACAO = formatDataSankhya(observacao)
+            let key = {
+                "IDACFECH": formatDataSankhya(dadosReprovacao[0].IDACFECH)
+            }
+            saveRecord(entity,fields,key)
+        }else{
+            alert("Fechamento reprovado com sucesso!")
+            let query = `SELECT * FROM AD_CADFECHCAIXA WHERE IDFECH = ${id} AND ATIVO = 'S'`
+            let novaReprovacao = getDadosSql(query,true)
+            fields.CODEMP = formatDataSankhya(novaReprovacao[0].CODEMP)
+            fields.CODUSU = formatDataSankhya(novaReprovacao[0].CODUSU)
+            fields.IDFECH = formatDataSankhya(id)
+            fields.APROVADO = formatDataSankhya("N")
+            fields.OBSERVACAO = formatDataSankhya(observacao)
+            saveRecord(entity,fields)
         }
-        saveRecord(entity,fields,key)
-    }else{
-        alert("Fechamento reprovado com sucesso!")
-        let query = `SELECT * FROM AD_CADFECHCAIXA WHERE IDFECH = ${id}`
-        let novaReprovacao = getDadosSql(query,true)
-        fields.CODEMP = formatDataSankhya(novaReprovacao[0].CODEMP)
-        fields.CODUSU = formatDataSankhya(novaReprovacao[0].CODUSU)
-        fields.IDFECH = formatDataSankhya(id)
-        fields.APROVADO = formatDataSankhya("N")
-        fields.OBSERVACAO = formatDataSankhya(observacao)
-        saveRecord(entity,fields)
     }
-}
 }
 
 function detalheComprovante(nunota,nome,num){
-    if(nunota != undefined){
+    if(nunota){
         let sql = `
         
         SELECT FIN.CODEMP,
@@ -456,11 +473,7 @@ function detalheComprovante(nunota,nome,num){
                     let dataNoFormat = dados[i].DHBAIXA.split(" ");
                     dataFormatada = `${formatandoData(dataNoFormat[0])} ${dataNoFormat[1]}`
                 }
-                let valor = (dados[i].VLRDESDOB).toString();
-
-                console.log(valor)
-                console.log(typeof(valor))
-                
+                let valor = (dados[i].VLRDESDOB).toString();                
 
                 tabelaHTML+=`
                 <tr style="border-bottom:1px solid #ccc">
@@ -492,8 +505,19 @@ function detalheComprovante(nunota,nome,num){
     }
 }
 
+function hoverButtonClear(num) {
+    let x = document.querySelector(".apaga-card-comprovante"+num)
+    x.style.color = "red";
+    x.style.borderColor = "red";
+  }
+  function outButtonClear(num){
+    let x = document.querySelector(".apaga-card-comprovante"+num)
+    x.style.color = "#888";
+    x.style.borderColor = "#888";
+  }
+
 function visualizaImagens(id){
-    let sql = `SELECT * FROM AD_ADCADFECHIMG WHERE IDFECH = ${id}`;
+    let sql = `SELECT * FROM AD_ADCADFECHIMG WHERE IDFECH = ${id} AND ATIVO = 'S'`;
     let imgs = getDadosSql(sql,true)
     console.log(imgs)
 
@@ -505,10 +529,21 @@ function visualizaImagens(id){
         for(let i = 0; i < imgs.length; i++){
             if(imgs[i].IMG_ENV == "S"){
                 rows += `
-                <div class="col-3 mb-3">
-                    <div class="card">
-                        <div class="card-header">
+                <div class="col-3 mb-3 mt-3">
+                    <div class="card card-comprovantes-single">
+                        <div class="card-header d-flex flex-row justify-content-between">
                             <p><strong>#${i+1}</strong></p>
+                            <span 
+                                onmouseover="hoverButtonClear(${i})" 
+                                onmouseout="outButtonClear(${i})" 
+                                class="apaga-card-comprovante${i}" 
+                                onclick="apagaComprovanteFechamento(${imgs[i].IDIMG},${id})" 
+                                style="transition:.5s;width:30px;height:30px;color:#888;border:2px solid #888;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer"
+                                title="Excluir comprovante permanentemente">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16" style="width:15px;height:15px;font-weight:bold">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                </svg>
+                            </span>
                         </div>
                         <div class="card-body" style="height:200px">
                             <a onclick="abrirImagemNovaJanela('${imgs[i].IMG }')" title="Expandir tamanho da imagem" target="_blank">
@@ -561,9 +596,54 @@ var modalImagensBoot = new bootstrap.Modal(document.getElementById("modalImagens
     backdrop:false
 })
 modalImagensBoot.show();
+body.css('overflow', 'auto');
 
 }
 
+function apagaComprovanteFechamento(id,idfech){
+    let modal = `
+    <div class="modal" id="apaga-comprovante" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Apagar comprovante</h5>
+            <button type="button" onclick="fechaModal('apaga-comprovante')" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Voce realmente deseja apagar esse comprovante?</p>
+            </div>
+            <div class="modal-footer">
+            <button type="button" onclick="fechaModal('apaga-comprovante')" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" onclick="confirmaApagarFechamento(${id},${idfech})" class="btn btn-danger">Apagar</button>
+            </div>
+        </div>
+        </div>
+    </div>
+    `
+
+
+    $('body').append(modal)
+    var modalImagensBoot = new bootstrap.Modal(document.getElementById("apaga-comprovante"),{
+        backdrop:false
+    })
+    modalImagensBoot.show();
+
+}
+
+function confirmaApagarFechamento(id,idfech){
+
+    let fields = {}
+    let entity = "AD_ADCADFECHIMG"
+    let key = {
+        "IDIMG":formatDataSankhya(id),
+        "IDFECH":formatDataSankhya(idfech)
+    }
+    fields.ATIVO       = formatDataSankhya("N")
+
+    saveRecord(entity,fields,key)
+
+    fechaModal("apaga-comprovante")
+}
 function abrirImagemNovaJanela(img){
                 const novaJanela = window.open("", "_blank");
             
@@ -594,7 +674,7 @@ function salvarDadosFechamento(id){
             saveRecord(entity,fields,key)
 
         }else{
-            let sql = "SELECT IDFECH, CODEMP,CODUSU FROM AD_CADFECHCAIXA WHERE IDFECH = "+id;
+            let sql = "SELECT IDFECH, CODEMP,CODUSU FROM AD_CADFECHCAIXA WHERE IDFECH = "+id+" AND ATIVO = 'S'";
             let dadosCadFechamento = getDadosSql(sql,true);
 
             let fields = {}
@@ -608,20 +688,28 @@ function salvarDadosFechamento(id){
             saveRecord(entity,fields)
         }
 }
-function fechaModal(nota){
-    var myModal = new bootstrap.Modal(document.getElementById(`${nota}`))
+function fechaModal(modal){
+    console.log("Fechando Modal")
+    var myModal = new bootstrap.Modal(document.getElementById(`${modal}`), {
+        backdrop: false
+    })
     myModal.hide()
-    $('#'+nota).remove()
-    $('body').removeClass('modal-open')
-    $('body').css('padding-right','')
+    $(`#${modal}`).remove();
+    var modalBackdrop = document.querySelector('.modal-backdrop');
+    if (modalBackdrop) {
+        modalBackdrop.remove(); // Remove o backdrop manualmente
+    }
 }
+
 function verificaSeExiste(codEmp, dia, mes, ano){
 
     let sql = ` select aci.IMG_ENV,aaf.APROVADO, ac.CONFIRMACAO  from AD_CADFECHCAIXA ac
                 left join AD_ACOMPFECHCAIXA aaf on aaf.IDFECH = ac.IDFECH
                 left join AD_ADCADFECHIMG aci on aci.IDFECH = ac.IDFECH
                 WHERE ac.CODEMP = ${codEmp}
-                and ac.DHFECH between '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 00:00:00' and '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 23:59:59'`;
+                and ac.DHFECH between '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 00:00:00' and '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 23:59:59'
+                AND ac.ATIVO = 'S'
+                AND aci.ATIVO = 'S'`;
 
 
     let color = "";
@@ -661,6 +749,7 @@ function mudarCor(id){
                 left join AD_ADCADFECHIMG aci on aci.IDFECH = ac.IDFECH
                 where ac.CODEMP < 100
                 and ac.IDFECH = ${id}
+                AND ac.ATIVO = 'S'
     `
     let color = "";
     let dadosArray = getDadosSql(sql,true);
@@ -675,9 +764,7 @@ function mudarCor(id){
 
             if(aprovado == "N"){
                 color = "text-white bg-danger"                
-            }
-            
-            else if(confirmacao == "N" && imagemEnviada != "S"){
+            }else if(confirmacao == "N" && imagemEnviada != "S"){
                 color = "bg-warning";
             }
             else if(confirmacao == "S" && imagemEnviada != "S"){

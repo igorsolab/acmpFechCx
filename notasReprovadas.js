@@ -69,6 +69,7 @@ function notasReprovadas(loja,data){
         inner join TSIUSU t on aa.CODUSU = t.CODUSU
         inner join TSIEMP t2 on t2.CODEMP = aa.CODEMP 
         where APROVADO = 'N'
+        AND ATIVO = 'S'
         ${loja}
         ${data}
     `;

@@ -1,7 +1,7 @@
 function acompanhamentoServicos(){
     let card = `
     <div style="background-color:#eee;padding:40px 0;margin-top:-50px;margin-bottom:50px">
-    <div class="container row">
+    <div class="container row d-flex justify-content-between">
         <div class="col-6  d-flex justify-content-center">
             <div class="card mb-3" style="width:190px">
                 <div class="card-header bg-transparent">Buscar:</div>
@@ -52,19 +52,15 @@ function buscarServicos(){
             <div class="col-3 mt-4 card-single">
                 <div class="card" >
                     <div class="card-body">
-                        <h5 class="card-title">${dadosServicos[i].NOMEFANTASIA}</h5>
+                        <h5 class="card-title d-flex justify-content-between"><div>${dadosServicos[i].NOMEFANTASIA}</div> <div>#${i+1}</div></h5>
                         <h6 class="card-subtitle mb-2 text-muted">NUNOTA: ${dadosServicos[i].NUNOTA}</h6>
                         <p>${dadosServicos[i].LABEL}</p>
                         <div class="card-footer d-flex justify-content-around">
                             <button class="btn btn-secondary" onclick="expandirDocumento('${dadosServicos[i].IDSERV}')"><span title="Visualizar Nota"><i class="bi bi-file-earmark-text-fill"></i></span></button>
-                            <div class="d-flex flex-row justify-content-between">
-                                <div style="margin-right:10px">
-                                    <button class="btn btn-success" data-card="card${i}" style onclick="salvarDocServico('${dadosServicos[i].IDSERV}','card${i}')"><span title="Aprovar fechamento do caixa"><i class="bi bi-check2"></i></span></button>
-                                </div>
-                                <div>
-                                    <button class="btn btn-danger" data-excluido="card${i}" onclick="modalReprovacaoServico('${dadosServicos[i].IDSERV}','card${i}')"><span title="Reprovar fechamento do caixa"><i class="bi bi-trash"></i></span></button>
-                                </div>
-                            </div>
+                            <button class="btn btn-info" onclick="detalheComprovante('${dadosServicos[i].NUNOTA}','detalhes_comprovante',${i+1})"><span title="Ver detalhes do comprovante"><i class="bi bi-pencil-square"></i></span></button>
+                            <button class="btn btn-success" data-card="card${i}" style onclick="salvarDocServico('${dadosServicos[i].IDSERV}','card${i}')"><span title="Aprovar fechamento do caixa"><i class="bi bi-check2"></i></span></button>
+                            <button class="btn btn-danger" data-excluido="card${i}" onclick="modalReprovacaoServico('${dadosServicos[i].IDSERV}','card${i}')"><span title="Reprovar fechamento do caixa"><i class="bi bi-trash"></i></span></button>
+                            
                         </div>
                     </div>
                 </div>
@@ -182,7 +178,9 @@ function reprovacaoServico(id,card){
     }
 
     fechaModal('modalServicoReprovado')
-    $('body').css('overflow', 'auto');
+    setTimeout(()=> {
+        $('body').css('overflow', 'auto');
+    },2000)
 }
 
 function servicosAvaliados(){
