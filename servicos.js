@@ -112,12 +112,12 @@ function salvarDocServico(id,card){
     saveRecord(entity,fields,key)
 
 
-    var card = document.querySelector(`[data-card="${card}"]`).closest(".card-single");
+    var card_exclude = document.querySelector(`[data-card="${card}"]`).closest(".card-single");
             
     // Verifique se o card foi encontrado
-    if (card) {
+    if (card_exclude) {
         // Remova o card do DOM
-        card.remove();
+        card_exclude.remove();
     }
 }
 

@@ -269,12 +269,12 @@ function modalFechamento(codEmp,dia,mes,ano){
     let dadosIndividuais = getDadosSql(sql,true)
 
     let modal = `
-        <div class="modal fade" id="myModal" tabindex="-1">
+        <div class="modal fade" id="modalFechamento" tabindex="-1">
             <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Detalhes da loja ${dadosIndividuais[0].NOMEFANTASIA}<br>Data: ${dia<10 ? "0"+dia : dia}/${mes < 10 ? "0"+mes : mes}/${ano}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="fechaModal('myModal')" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="fechaModal('modalFechamento')" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <p>${dadosIndividuais.length == 0 ? "Nao ha registro" : 
@@ -299,11 +299,12 @@ function modalFechamento(codEmp,dia,mes,ano){
                                     </div>
                                 </div>
                                 
-                                ` )}
+                                ` )
+                            }
                         </p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="fechaModal('myModal')" data-bs-dismiss="modal">Fechar</button
+                        <button type="button" class="btn btn-secondary" onclick="fechaModal('modalFechamento')" data-bs-dismiss="modal">Fechar</button
                     </div>
                 </div>
             </div>
@@ -311,7 +312,10 @@ function modalFechamento(codEmp,dia,mes,ano){
     let body = $("body")
     body.append(modal)
 
-    var myModal = new bootstrap.Modal(document.getElementById("myModal"))
+    var myModal = new bootstrap.Modal(document.getElementById("modalFechamento"), {
+        keyboard:false,
+        backdrop:false,
+    })
     myModal.show(myModal);
 }
 
@@ -529,7 +533,7 @@ function visualizaImagens(id){
         for(let i = 0; i < imgs.length; i++){
             if(imgs[i].IMG_ENV == "S"){
                 rows += `
-                <div class="col-3 mb-3 mt-3">
+                <div class="col-3 mb-3 mt-3" id="${imgs[i].IDIMG}_${id}">
                     <div class="card card-comprovantes-single">
                         <div class="card-header d-flex flex-row justify-content-between">
                             <p><strong>#${i+1}</strong></p>
@@ -567,6 +571,11 @@ function visualizaImagens(id){
     }
 rows+="</div>"
 console.log(rows)
+
+if(rows === "<div class='row d-flex justify-content-center mb-3'></div>"){
+    return
+}
+
 let modalImagens = `
 <div class="modal fade" id="modalImagens" tabindex="-1">
 <div class="modal-dialog modal-custom modal-dialog-scrollable">
@@ -593,7 +602,8 @@ let body = $("body")
 body.append(modalImagens)
 
 var modalImagensBoot = new bootstrap.Modal(document.getElementById("modalImagens"),{
-    backdrop:false
+    backdrop:false,
+    keyboard:false
 })
 modalImagensBoot.show();
 body.css('overflow', 'auto');
@@ -602,7 +612,7 @@ body.css('overflow', 'auto');
 
 function apagaComprovanteFechamento(id,idfech){
     let modal = `
-    <div class="modal" id="apaga-comprovante" tabindex="-1">
+    <div class="modal fade" id="apaga-comprovante" tabindex="-1">
         <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -624,6 +634,7 @@ function apagaComprovanteFechamento(id,idfech){
 
     $('body').append(modal)
     var modalImagensBoot = new bootstrap.Modal(document.getElementById("apaga-comprovante"),{
+        keyboard:false,
         backdrop:false
     })
     modalImagensBoot.show();
@@ -642,7 +653,14 @@ function confirmaApagarFechamento(id,idfech){
 
     saveRecord(entity,fields,key)
 
+    
     fechaModal("apaga-comprovante")
+    let cards = $(`#${id}_${idfech}`)
+
+    console.log(cards.length)
+    if(cards.length > 0)
+        cards.remove()
+    // cards.remove()
 }
 function abrirImagemNovaJanela(img){
                 const novaJanela = window.open("", "_blank");
@@ -689,7 +707,7 @@ function salvarDadosFechamento(id){
         }
 }
 function fechaModal(modal){
-    console.log("Fechando Modal")
+    console.log("Fechando Modal: ",modal)
     var myModal = new bootstrap.Modal(document.getElementById(`${modal}`), {
         backdrop: false
     })
@@ -699,6 +717,12 @@ function fechaModal(modal){
     if (modalBackdrop) {
         modalBackdrop.remove(); // Remove o backdrop manualmente
     }
+
+    limpaRegistrosModal(modal)
+}
+
+function limpaRegistrosModal(modal){
+    $(`#${modal}`).remove()
 }
 
 function verificaSeExiste(codEmp, dia, mes, ano){
@@ -708,10 +732,10 @@ function verificaSeExiste(codEmp, dia, mes, ano){
                 left join AD_ADCADFECHIMG aci on aci.IDFECH = ac.IDFECH
                 WHERE ac.CODEMP = ${codEmp}
                 and ac.DHFECH between '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 00:00:00' and '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 23:59:59'
-                AND ac.ATIVO = 'S'
-                AND aci.ATIVO = 'S'`;
+                AND ac.ATIVO = 'S'`;
 
 
+    console.log(sql)
     let color = "";
     let dadosArray = getDadosSql(sql,true);
 
@@ -766,8 +790,7 @@ function mudarCor(id){
                 color = "text-white bg-danger"                
             }else if(confirmacao == "N" && imagemEnviada != "S"){
                 color = "bg-warning";
-            }
-            else if(confirmacao == "S" && imagemEnviada != "S"){
+            }else if(confirmacao == "S" && imagemEnviada != "S"){
                 color = "bg-warning";
             }else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == "S"){
                 color = "text-white bg-success"
