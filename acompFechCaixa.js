@@ -182,31 +182,32 @@ function construindoTabela(modalLoading) {
 
         let numLojas = getDadosSql(sql)
 
+        console.log(numLojas.length)
+        if(numLojas) {
 
-        for (let z = 0; z < numLojas.length; z++) {
+            for (let z = 0; z < numLojas.length; z++) {
 
-            tabela += `<tr>
-                    <th scope="col">${numLojas[z][1]}</th>`
-
-            for (let j = 1; j < dataFull.dia; j++) {
-                let color = verificaSeExiste(numLojas[z][0],j, dataFull.mes, dataFull.ano)
+                tabela += ` <tr>
+                                <th scope="col">${numLojas[z][1]}</th>`
+                for (let j = 1; j < dataFull.dia; j++) {
+                    let color = verificaSeExiste(numLojas[z][0],j, dataFull.mes, dataFull.ano)
                     tabela += ` <td class="${color}" style="cursor:pointer; text-align:center" onclick="fechamentoDeCaixa(${numLojas[z][0]},${j},${dataFull.mes},${dataFull.ano});">
                                     <span title="Loja: ${numLojas[z][1].trim()} na data: ${j < 10 ? "0"+j : j}/${dataFull.mes}/${dataFull.ano}">
-                                        <i class="bi bi-file-earmark-fill coluna-diaria-fechamento" ></i>
+                                        <i class="bi bi-file-earmark-fill coluna-diaria-fechamento"></i>
                                     </span>
                                 </td>`
-
+                }
+                tabela += `</tr>`
             }
-            tabela += `</tr>`
-        }
 
-        tabela += `   
-                            </tbody>
-                        </table>
+            tabela += `   
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `
+            `
+        }
         let tela = $("#exibe");
         tela.empty()
         tela.append(navbar())
@@ -727,54 +728,110 @@ function limpaRegistrosModal(modal){
 
 function verificaSeExiste(codEmp, dia, mes, ano){
 
-    let sql = ` select aci.IMG_ENV,aaf.APROVADO, ac.CONFIRMACAO  from AD_CADFECHCAIXA ac
-                left join AD_ACOMPFECHCAIXA aaf on aaf.IDFECH = ac.IDFECH
-                left join AD_ADCADFECHIMG aci on aci.IDFECH = ac.IDFECH
-                WHERE ac.CODEMP = ${codEmp}
-                and ac.DHFECH between '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 00:00:00' and '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 23:59:59'
-                AND ac.ATIVO = 'S'`;
+    let sql = `        SELECT 
+    aci.IMG_ENV,
+    aci.ATIVO,
+    aaf.APROVADO, 
+    ac.CONFIRMACAO, 
+    ac.IDCONFCEGA, 
+    STUFF((
+        SELECT ',' + CONVERT(VARCHAR(10), ac3.IDAGRUPAMENTOCONFCEGA)
+        FROM AD_CONFERENCIACEGATITULOS ac3
+        WHERE ac3.IDCONFCEGA = ac.IDCONFCEGA
+        FOR XML PATH(''), TYPE).value('.', 'VARCHAR(MAX)'), 1, 1, '') AS IDAGRUPAMENTOCONFCEGA,
+    ac.DHFECH 
+    FROM 
+        AD_CADFECHCAIXA ac
+    LEFT JOIN 
+        AD_ACOMPFECHCAIXA aaf ON aaf.IDFECH = ac.IDFECH
+    LEFT JOIN 
+        AD_ADCADFECHIMG aci ON aci.IDFECH = ac.IDFECH
+    LEFT JOIN 
+        AD_CONFERENCIACEGA ac2 ON ac2.IDCONFCEGA = ac.IDCONFCEGA
+    LEFT JOIN 
+        AD_CONFERENCIACEGATITULOS ac3 on ac3.IDCONFCEGA = ac.IDCONFCEGA 
+    LEFT JOIN
+        AD_AGRUPAMENTOCONFCEGA aa on ac3.IDAGRUPAMENTOCONFCEGA = aa.IDAGRUPAMENTOCONFCEGA
+    WHERE 
+        ac.CODEMP = ${codEmp}
+        AND ac.DHFECH BETWEEN '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 00:00:00' AND '${dia < 10 ? "0"+dia : dia}/${mes}/${ano} 23:59:59'
+        AND ac.ATIVO = 'S'
+    GROUP BY 
+        aci.IMG_ENV, aci.ATIVO, aaf.APROVADO, ac.CONFIRMACAO, ac.IDCONFCEGA, ac.DHFECH
+    ORDER BY ac.DHFECH 
+
+`;
 
 
-    console.log(sql)
+    // console.log(sql)
     let color = "";
     let dadosArray = getDadosSql(sql,true);
 
+    // console.log(sql)
+    // console.log(dadosArray)
+
     
     if(dadosArray.length > 0){
-    dadosArray.map((e)=>{
-        let imagemEnviada   = e.IMG_ENV
-        let aprovado        = e.APROVADO;
-        let confirmacao     = e.CONFIRMACAO;
-            if(aprovado == "N"){
-                color = "text-white bg-danger"                
-            }else if(confirmacao == "N" && imagemEnviada != "S"){
-                color = "bg-warning";
-            }else if(confirmacao == "S" && imagemEnviada != "S"){
-                color = "bg-warning";
-            }else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == "S"){
-                color = "text-white bg-success"
-            }else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == "N"){
-                color = "text-white bg-danger"
-            }else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == null || aprovado == undefined){
-                color = "text-white bg-primary"
-            }
+        dadosArray.map((e)=>{
+            let imagemEnviada       = e.IMG_ENV
+            let aprovado            = e.APROVADO;
+            let confirmacao         = e.CONFIRMACAO;
+            let ativo               = e.ATIVO;
+            let agrupamento         = e.IDAGRUPAMENTOCONFCEGA
+            console.log(agrupamento)
+            let agrupamentoArray    = agrupamento === null ? [0] : agrupamento.split(',')
+            // console.log(agrupamentoArray.includes('2'))
+
+                if(aprovado == "N")
+                {
+                    color = "text-white bg-danger"                
+                }
+                if(!(agrupamentoArray.includes('2') || agrupamentoArray.includes('3'))){
+                    color = "text-white bg-primary"
+                    console.log("\n\nNão possui POS")
+                    console.log("#######################\n\n\n")
+                }
+                else if(confirmacao == "N" && imagemEnviada != "S")
+                {
+                    color = "bg-warning";
+                }
+                else if(confirmacao == "S" && imagemEnviada != "S")
+                {
+                    color = "bg-warning";
+                }
+                else if(ativo == 'N')
+                {
+                    color = 'bg-warning';
+                }
+                else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == "S")
+                {
+                    color = "text-white bg-success"
+                }
+                else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == "N")
+                {
+                    color = "text-white bg-danger"
+                }
+                else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == null || aprovado == undefined)
+                {
+                    color = "text-white bg-primary"
+                }
         })
-    }else{
-        color="text-white bg-secondary"
-    }
+        }else{
+            color="text-white bg-secondary"
+        }
 
     return color;
 }
 
 function mudarCor(id){
     console.log(id)
-    let sql = ` select aci.IMG_ENV,aaf.APROVADO, ac.CONFIRMACAO  from AD_CADFECHCAIXA ac
+    let sql = ` select aci.IMG_ENV,aci.ATIVO,aaf.APROVADO, ac.CONFIRMACAO  from AD_CADFECHCAIXA ac
                 left join AD_ACOMPFECHCAIXA aaf on aaf.IDFECH = ac.IDFECH
                 left join AD_ADCADFECHIMG aci on aci.IDFECH = ac.IDFECH
                 where ac.CODEMP < 100
                 and ac.IDFECH = ${id}
-                AND ac.ATIVO = 'S'
-    `
+                AND ac.ATIVO = 'S'`
+                
     let color = "";
     let dadosArray = getDadosSql(sql,true);
 
@@ -783,6 +840,7 @@ function mudarCor(id){
         let imagemEnviada   = e.IMG_ENV
         let aprovado        = e.APROVADO;
         let confirmacao     = e.CONFIRMACAO;
+        let ativo           = e.ATIVO
 
         // verde = Aprovado // vermelho = Reprovado // Amarelo = Pendente de avaliação // Azul = Incompleto
 
@@ -792,6 +850,8 @@ function mudarCor(id){
                 color = "bg-warning";
             }else if(confirmacao == "S" && imagemEnviada != "S"){
                 color = "bg-warning";
+            }else if(ativo == 'N'){
+                color = 'bg-warning';
             }else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == "S"){
                 color = "text-white bg-success"
             }else if(confirmacao == "S" && imagemEnviada == "S" && aprovado == "N"){
